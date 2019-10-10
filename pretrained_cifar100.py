@@ -10,20 +10,13 @@ from torch import optim
 from torch.backends import cudnn
 from torch.utils import data, model_zoo
 from torch.autograd import Variable
-from resnetmodel import ResNet
-from basicblock import BasicBlock
 
-import argparse
-
-parser = argparse.ArgumentParser()
-parser.add_argument("--fine_tune", default=False, type=bool, help="Type True if you wish to fine tune")
-args = parser.parse_args()
 
 data_dir = "./Data"
 batch_size_train = 128
 batch_size_test = 64
 learning_rate = 0.001
-epochs = 50
+epochs = 30
 load_chkpt = False
 
 
@@ -37,42 +30,29 @@ model_urls = {
 
 
 def resnet18(pretrained=True):
+    """Gets the pre made res net model from torchvision library and loads the state_dict"""
     model = torchvision.models.resnet.ResNet(torchvision.models.resnet.BasicBlock, [2, 2, 2, 2])
     if pretrained:
+        # model_zoo.load_url -> loads the specified model's state dict into the specified location
         model.load_state_dict(model_zoo.load_url(model_urls['resnet18'], model_dir='./pretrained'))
     return model
 
 
-
 def main():
 
-    """Transformations for Augmenting and Normalizing Training Dataset"""
-    if not args.fine_tune:
-        augment_train_ds = transforms.Compose([
-            transforms.RandomCrop(32, padding=2),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.2, 0.2, 0.2)),
-        ])
-        """Normalizing Test Dataset"""
-        augment_test_ds = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.2, 0.2, 0.2)),
-        ])
-    else:
-        """Upscale the CIFAR100 dataset and apply augmentation to fit the ImageNet pre-trained model input"""
-        augment_train_ds = transforms.Compose([
-            transforms.Resize(224),
-            transforms.RandomCrop(224, padding=4),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.2, 0.2, 0.2)),
-        ])
-        augment_test_ds = transforms.Compose([
-            transforms.Resize(224),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.2, 0.2, 0.2)),
-        ])
+    """Apply augmentation & Upscale the CIFAR100 dataset to fit the ImageNet pre-trained model input"""
+    augment_train_ds = transforms.Compose([
+        transforms.Resize(224),
+        transforms.RandomCrop(224, padding=4),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.2, 0.2, 0.2)),
+    ])
+    augment_test_ds = transforms.Compose([
+        transforms.Resize(224),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.2, 0.2, 0.2)),
+    ])
 
     """Set seed."""
     np.random.seed(0)
@@ -90,17 +70,10 @@ def main():
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    if args.fine_tune:
-        print("Initializing pre-trained model")
-        res_net = resnet18()
-        """Altering the fully connected layer of the pre0trained res net to fit CIFAR100 classificatio """
-        print("in features", res_net.fc.in_features)
-        res_net.fc = nn.Linear(res_net.fc.in_features, 100)
-    else:
-        print("Initializing Model")
-        basic_block = BasicBlock
-        res_net = ResNet(basic_block=basic_block, num_basic_blocks_list=[2, 4, 4, 2], num_classes=100)
-
+    print("Initializing pre-trained model")
+    res_net = resnet18(pretrained=True)
+    """Altering the fully connected layer of the pre-trained res net model to fit CIFAR100 classification"""
+    res_net.fc = nn.Linear(res_net.fc.in_features, 100)
     res_net = res_net.to(device)
     start_epoch = 0
 
@@ -126,9 +99,7 @@ def main():
 
     for epoch in range(start_epoch, epochs):
 
-        res_net.train()
-
-        total_loss = 0.0
+        cur_loss = 0.0
         total_correct = 0
         total_samples = 0
 
@@ -157,8 +128,8 @@ def main():
             loss.backward()
             optimizer.step()
 
-            total_loss += loss.item()
-            avg_loss = total_loss/(i + 1)
+            cur_loss += loss.item()
+            cur_loss /= (i + 1)
 
             _, predicted_label = torch.max(outputs, 1)
             # print(predicted_label.shape, labels.shape)
@@ -171,7 +142,7 @@ def main():
 
             if i % 100 == 0:
                 print('Training [epoch: %d, batch: %d] loss: %.3f, accuracy: %.5f' %
-                      (epoch + 1, i + 1, avg_loss, accuracy))
+                      (epoch + 1, i + 1, cur_loss, accuracy))
 
         """Saving model after every 5 epochs"""
         if (epoch + 1) % 5 == 0:
