@@ -26,7 +26,6 @@ learning_rate = 0.001
 epochs = 50
 load_chkpt = False
 
-
 model_urls = {
     'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
     'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
@@ -43,9 +42,7 @@ def resnet18(pretrained=True):
     return model
 
 
-
 def main():
-
     """Transformations for Augmenting and Normalizing Training Dataset"""
     if not args.fine_tune:
         augment_train_ds = transforms.Compose([
@@ -126,7 +123,9 @@ def main():
 
     for epoch in range(start_epoch, epochs):
 
-        cur_loss = 0.0
+        res_net.train()
+
+        total_loss = 0.0
         total_correct = 0
         total_samples = 0
 
@@ -139,7 +138,6 @@ def main():
                         state['step'] = 1000
 
         for i, (inputs, labels) in enumerate(train_ds_loader):
-
             """Transfer inputs and labels to CUDA if available"""
             inputs = inputs.to(device)
             labels = labels.to(device)
@@ -155,8 +153,8 @@ def main():
             loss.backward()
             optimizer.step()
 
-            cur_loss += loss.item()
-            cur_loss /= (i + 1)
+            total_loss += loss.item()
+            avg_loss = total_loss / (i + 1)
 
             _, predicted_label = torch.max(outputs, 1)
             # print(predicted_label.shape, labels.shape)
@@ -167,9 +165,9 @@ def main():
             total_correct += predicted_label.eq(labels.long()).float().sum().item()
             accuracy = total_correct / total_samples
 
-            if i % 100 == 0:
-                print('Training [epoch: %d, batch: %d] loss: %.3f, accuracy: %.5f' %
-                      (epoch + 1, i + 1, cur_loss, accuracy))
+            # if i % 100 == 0:
+            print('Training [epoch: %d, batch: %d] loss: %.3f, accuracy: %.5f' %
+                  (epoch + 1, i + 1, avg_loss, accuracy))
 
         """Saving model after every 5 epochs"""
         if (epoch + 1) % 5 == 0:
@@ -219,5 +217,5 @@ def main():
     print("Testing Completed with accuracy:" + str(accuracy))
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
