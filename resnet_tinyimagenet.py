@@ -24,8 +24,8 @@ def create_val_folder(val_dir):
     path = os.path.join(val_dir, 'images')
     # file where image2class mapping is present
     filename = os.path.join(val_dir, 'val_annotations.txt')
-    fp = open(filename, "r") # open file in read mode
-    data = fp.readlines() # read line by line
+    fp = open(filename, "r")  # open file in read mode
+    data = fp.readlines()  # read line by line
     """
     Create a dictionary with image names as key and
     corresponding classes as values
@@ -33,7 +33,7 @@ def create_val_folder(val_dir):
     val_img_dict = {}
     for line in data:
         words = line.split("\t")
-    val_img_dict[words[0]] = words[1]
+        val_img_dict[words[0]] = words[1]
     fp.close()
     # Create folder if not present, and move image into proper folder
     for img, folder in val_img_dict.items():
@@ -55,7 +55,7 @@ def main():
 
     """Transformations for Augmenting and Normalizing Training Dataset"""
     augment_train_ds = transforms.Compose([
-        transforms.RandomCrop(224, padding=4),
+        transforms.RandomCrop(64, padding=2),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.2, 0.2, 0.2)),
@@ -73,22 +73,25 @@ def main():
     torch.cuda.manual_seed(0)
 
     train_dir = '/u/training/tra287/scratch/tiny-imagenet-200/train'
-    val_dir = '/u/training/tra287/scratch/tiny-imagenet-200/val'
-
-    train_ds = torchvision.datasets.ImageNet(train_dir, split='train', download=False, transform=augment_train_ds)
+    train_ds = datasets.ImageFolder(train_dir, transform=augment_train_ds)
+    print(train_ds.class_to_idx)
     train_ds_loader = data.DataLoader(train_ds, batch_size=batch_size_train, shuffle=True, num_workers=8)
-    test_ds = torchvision.datasets.ImageNet(val_dir, split='val', download=False, transform=augment_test_ds)
-    test_ds_loader = data.DataLoader(test_ds, batch_size=batch_size_test, shuffle=False, num_workers=8)
 
-    # train_ds = datasets.ImageFolder(train_dir, transform=augment_train_ds)
-    # train_ds_loader = torch.utils.data.DataLoader(train_ds, batch_size=batch_size_train, shuffle=True, num_workers=8)
-    # val_img_dir = os.path.join(val_dir, 'images')
-    # if 'val_' in os.listdir(val_img_dir)[0]:
-    #     create_val_folder(val_dir)
-    # else:
-    #     pass
-    # test_ds = datasets.ImageFolder(val_dir, transform=augment_test_ds)
-    # test_ds_loader = torch.utils.data.DataLoader(test_ds,batch_size=batch_size_test, shuffle=False, num_workers=8)
+    val_dir = '/u/training/tra287/scratch/tiny-imagenet-200/val/'
+
+    if 'val_' in os.listdir(val_dir+'images/')[0]:
+        create_val_folder(val_dir)
+        val_dir = val_dir+'images/'
+    else:
+        val_dir = val_dir+'images/'
+    #train_ds = torchvision.datasets.ImageNet(train_dir, split='train', download=False, transform=augment_train_ds)
+    # train_ds_loader = data.DataLoader(train_ds, batch_size=batch_size_train, shuffle=True, num_workers=8)
+    # test_ds = torchvision.datasets.ImageNet(val_dir, split='val', download=False, transform=augment_test_ds)
+    # test_ds_loader = data.DataLoader(test_ds, batch_size=batch_size_test, shuffle=False, num_workers=8)
+
+    test_ds = datasets.ImageFolder(val_dir, transform=augment_test_ds)
+    print(test_ds.class_to_idx)
+    test_ds_loader = torch.utils.data.DataLoader(test_ds, batch_size=batch_size_test, shuffle=False, num_workers=8)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
