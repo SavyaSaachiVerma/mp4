@@ -135,10 +135,6 @@ def main():
                     if state['step'] >= 1024:
                         state['step'] = 1000
 
-        for inputs, labels in train_ds_loader:
-            print(inputs.shape())
-            print(labels.shape())
-
         for i, (inputs, labels) in enumerate(train_ds_loader):
 
             """Transfer inputs and labels to CUDA if available"""
