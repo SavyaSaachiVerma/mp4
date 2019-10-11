@@ -45,7 +45,8 @@ def create_val_folder(val_dir):
         os.rename(os.path.join(path, img), os.path.join(newpath, img))
     return
 
-batch_size_train = 128
+
+batch_size_train = 256
 batch_size_test = 64
 learning_rate = 0.001
 epochs = 30
@@ -97,7 +98,7 @@ def main():
 
     print("Initializing Model")
     basic_block = BasicBlock
-    res_net = ResNet(basic_block=basic_block, num_basic_blocks_list=[2, 4, 4, 2], num_classes=100)
+    res_net = ResNet(basic_block=basic_block, num_basic_blocks_list=[2, 4, 4, 2], num_classes=200)
     res_net = res_net.to(device)
     start_epoch = 0
 
@@ -164,7 +165,7 @@ def main():
             total_correct += predicted_label.eq(labels.long()).float().sum().item()
             accuracy = total_correct / total_samples
 
-            if i % 20 == 0:
+            if i % 100 == 0:
                 print('Training [epoch: %d, batch: %d] loss: %.3f, accuracy: %.5f' %
                       (epoch + 1, i + 1, cur_loss, accuracy))
 
