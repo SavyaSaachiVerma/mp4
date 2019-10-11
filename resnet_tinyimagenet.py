@@ -73,16 +73,23 @@ def main():
     torch.cuda.manual_seed(0)
 
     train_dir = '/u/training/tra287/scratch/tiny-imagenet-200/train'
-    train_ds = datasets.ImageFolder(train_dir, transform=augment_train_ds)
-    train_ds_loader = torch.utils.data.DataLoader(train_ds, batch_size=batch_size_train, shuffle=True, num_workers=8)
     val_dir = '/u/training/tra287/scratch/tiny-imagenet-200/val'
-    val_img_dir = os.path.join(val_dir, 'images')
+
+    train_ds = torchvision.datasets.ImageNet(train_dir, split='train', download=False, transform=augment_train_ds)
+    train_ds_loader = data.DataLoader(train_ds, batch_size=batch_size_train, shuffle=True, num_workers=8)
+    test_ds = torchvision.datasets.ImageNet(val_dir, split='val', download=False, transform=augment_test_ds)
+    test_ds_loader = data.DataLoader(test_ds, batch_size=batch_size_test, shuffle=False, num_workers=8)
+
+    # train_ds = datasets.ImageFolder(train_dir, transform=augment_train_ds)
+    # train_ds_loader = torch.utils.data.DataLoader(train_ds, batch_size=batch_size_train, shuffle=True, num_workers=8)
+    # val_img_dir = os.path.join(val_dir, 'images')
     # if 'val_' in os.listdir(val_img_dir)[0]:
     #     create_val_folder(val_dir)
     # else:
     #     pass
-    test_ds = datasets.ImageFolder(val_dir, transform=augment_test_ds)
-    test_ds_loader = torch.utils.data.DataLoader(test_ds,batch_size=batch_size_test, shuffle=False, num_workers=8)
+    # test_ds = datasets.ImageFolder(val_dir, transform=augment_test_ds)
+    # test_ds_loader = torch.utils.data.DataLoader(test_ds,batch_size=batch_size_test, shuffle=False, num_workers=8)
+
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     print("Initializing Model")
