@@ -73,7 +73,7 @@ def main():
     torch.cuda.manual_seed(0)
 
     train_dir = '/u/training/tra287/scratch/tiny-imagenet-200/train'
-    train_ds = datasets.ImageFolder(train_dir,transform=augment_train_ds)
+    train_ds = datasets.ImageFolder(train_dir, transform=augment_train_ds)
     train_ds_loader = torch.utils.data.DataLoader(train_ds, batch_size=batch_size_train, shuffle=True, num_workers=8)
     val_dir = '/u/training/tra287/scratch/tiny-imagenet-200/val'
     val_img_dir = os.path.join(val_dir, 'images')
@@ -124,6 +124,10 @@ def main():
                     state = optimizer.state[p]
                     if state['step'] >= 1024:
                         state['step'] = 1000
+
+        for inputs, labels in train_ds_loader:
+            print(inputs.shape())
+            print(labels.shape())
 
         for i, (inputs, labels) in enumerate(train_ds_loader):
 
