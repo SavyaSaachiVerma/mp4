@@ -214,7 +214,10 @@ def main():
             accuracy = total_correct / total_samples
 
             if i % 50 == 0:
-                print('Testing [batch: %d] loss: %.3f, accuracy: %.5f' % (i + 1, cur_loss, accuracy))
+                print(i+1)
+                print(cur_loss)
+                print(accuracy)
+                # print('Testing [batch: %d] loss: %.3f, accuracy: %.5f' % (i + 1, cur_loss, accuracy))
 
         print("Testing Completed with accuracy:" + str(accuracy))
 
