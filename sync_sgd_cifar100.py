@@ -139,11 +139,11 @@ def main():
         for i, (inputs, labels) in enumerate(train_ds_loader):
 
             """Transfer inputs and labels to CUDA if available"""
-            inputs = inputs.cuda()
-            labels = labels.cuda()
+            inputs = Variable(inputs.cuda())
+            labels = Variable(labels.cuda())
 
             """Loss function requires the inputs to be wrapped in variables"""
-            inputs = Variable(inputs)
+            # inputs = Variable(inputs)
 
             """Torch tends to take cumulative gradients which is not required so setting it to zero after each batch"""
             optimizer.zero_grad()
