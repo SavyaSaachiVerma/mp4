@@ -198,7 +198,7 @@ def main():
         """Puts model in testing state"""
         res_net.eval()
 
-        accuracy = test(accuracy, loss_fn, res_net, test_ds_loader)
+        accuracy = test(loss_fn, res_net, test_ds_loader)
 
         print("Testing Completed with accuracy:" + str(accuracy))
 
