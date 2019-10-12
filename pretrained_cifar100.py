@@ -20,7 +20,7 @@ data_dir = "./Data"
 batch_size_train = 128
 batch_size_test = 64
 learning_rate = 0.001
-epochs = 15
+epochs = 20
 load_chkpt = False
 
 

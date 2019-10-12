@@ -51,7 +51,7 @@ def create_val_folder(val_dir):
 batch_size_train = 256
 batch_size_test = 64
 learning_rate = 0.001
-epochs = 30
+epochs = 50
 load_chkpt = False
 
 def main():

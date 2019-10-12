@@ -43,7 +43,7 @@ batch_size_train = 128
 batch_size_test = 64
 data_dir = "./Data"
 learning_rate = 0.001
-epochs = 5
+epochs = 50
 load_chkpt = False
 
 """ Partitioning MNIST """
