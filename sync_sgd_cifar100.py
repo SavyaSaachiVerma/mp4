@@ -163,7 +163,7 @@ def main():
             # arr = (predicted_label == labels).numpy()
             # print(np.sum(arr))
             """can not use numpy as the tensors are in CUDA"""
-            total_correct += predicted_label.eq(labels.long()).float().sum().data.numpy()
+            total_correct += predicted_label.eq(labels.long()).float().sum().cpu().data.numpy()
             accuracy = total_correct / total_samples
 
             if i % 100 == 0:
@@ -210,7 +210,7 @@ def main():
                 _, predicted_label = torch.max(outputs, 1)
                 total_samples += labels.shape[0]
                 # arr = (predicted_label == labels).numpy()
-                total_correct += predicted_label.eq(labels.long()).float().data.numpy()
+                total_correct += predicted_label.eq(labels.long()).float().cpu().data.numpy()
                 accuracy = total_correct / total_samples
 
                 if i % 50 == 0:
