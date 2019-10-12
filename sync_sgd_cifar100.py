@@ -209,10 +209,10 @@ def main():
 
             _, predicted_label = torch.max(outputs, 1)
             total_samples += labels.shape[0]
-            print(total_samples)
+            # print(total_samples)
             # arr = (predicted_label == labels).numpy()
             total_correct += predicted_label.eq(labels.long()).float().sum().cpu().data.numpy()
-            print(total_correct)
+            # print(total_correct)
             accuracy = total_correct / total_samples
 
             if i % 50 == 0:
