@@ -41,7 +41,7 @@ batch_size_train = 128
 batch_size_test = 64
 data_dir = "./Data"
 learning_rate = 0.001
-epochs = 50
+epochs = 5
 load_chkpt = False
 
 """ Partitioning MNIST """
@@ -194,28 +194,28 @@ def main():
         total_correct = 0
         total_samples = 0
         """Do testing under the no_grad() context so that torch does not store/use these actions to calculate gradients"""
-        with torch.no_grad():
-            for i, (inputs, labels) in enumerate(test_ds_loader):
-                inputs = Variable(inputs.cuda())
-                labels = Variable(labels.cuda())
+        #with torch.no_grad():
+        for i, (inputs, labels) in enumerate(test_ds_loader):
+            inputs = Variable(inputs.cuda())
+            labels = Variable(labels.cuda())
 
-                # inputs = Variable(inputs)
+            # inputs = Variable(inputs)
 
-                outputs = res_net(inputs)
-                loss = loss_fn(outputs, labels)
+            outputs = res_net(inputs)
+            loss = loss_fn(outputs, labels)
 
-                cur_loss += loss.cpu().data.numpy()
-                cur_loss /= (i + 1)
+            cur_loss += loss.cpu().data.numpy()
+            cur_loss /= (i + 1)
 
-                _, predicted_label = torch.max(outputs, 1)
-                total_samples += labels.shape[0]
-                # arr = (predicted_label == labels).numpy()
-                total_correct += predicted_label.eq(labels.long()).float().cpu().data.numpy()
-                accuracy = total_correct / total_samples
+            _, predicted_label = torch.max(outputs, 1)
+            total_samples += labels.shape[0]
+            # arr = (predicted_label == labels).numpy()
+            total_correct += predicted_label.eq(labels.long()).float().cpu().data.numpy()
+            accuracy = total_correct / total_samples
 
-                if i % 50 == 0:
-                    print('Testing [batch: %d] loss: %.3f, accuracy: %.5f' %
-                          (i + 1, cur_loss, accuracy))
+            if i % 50 == 0:
+                print('Testing [batch: %d] loss: %.3f, accuracy: %.5f' %
+                      (i + 1, cur_loss, accuracy))
 
         print("Testing Completed with accuracy:" + str(accuracy))
 
