@@ -154,7 +154,7 @@ def main():
             average_gradients(res_net)
             optimizer.step()
 
-            cur_loss += loss.data.item()
+            cur_loss += loss.cpu().data.item()
             cur_loss /= (i + 1)
 
             _, predicted_label = torch.max(outputs, 1)
@@ -204,7 +204,7 @@ def main():
                 outputs = res_net(inputs)
                 loss = loss_fn(outputs, labels)
 
-                cur_loss += loss.data.item()
+                cur_loss += loss.cpu().data.item()
                 cur_loss /= (i + 1)
 
                 _, predicted_label = torch.max(outputs, 1)
