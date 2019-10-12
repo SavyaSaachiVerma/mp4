@@ -1,3 +1,4 @@
+import csv
 import os
 
 import numpy as np
@@ -6,7 +7,6 @@ import torch.nn as nn
 import random
 import torchvision
 import torchvision.transforms as transforms
-import matplotlib.pyplot as plt
 
 from torch import optim
 from torch.backends import cudnn
@@ -19,7 +19,7 @@ data_dir = "./Data"
 batch_size_train = 128
 batch_size_test = 64
 learning_rate = 0.001
-epochs = 50
+epochs = 1
 load_chkpt = False
 
 
@@ -120,7 +120,7 @@ def main():
             optimizer.step()
 
             cur_loss += loss.item()
-            cur_loss /= (i + 1)
+            avg_loss = cur_loss / (i + 1)
 
             _, predicted_label = torch.max(outputs, 1)
             # print(predicted_label.shape, labels.shape)
@@ -131,9 +131,9 @@ def main():
             total_correct += predicted_label.eq(labels.long()).float().sum().item()
             accuracy = total_correct / total_samples
 
-            if i % 100 == 0:
-                print('Training [epoch: %d, batch: %d] loss: %.3f, accuracy: %.5f' %
-                      (epoch + 1, i + 1, cur_loss, accuracy))
+            # if i % 100 == 0:
+            print('Training [epoch: %d, batch: %d] loss: %.3f, accuracy: %.5f' %
+                  (epoch + 1, i + 1, avg_loss, accuracy))
 
         test_acc_list.append(test(loss_fn, res_net, test_ds_loader))
         """Saving model after every 5 epochs"""
@@ -158,19 +158,11 @@ def main():
 
     print("Testing Completed with accuracy:" + str(accuracy))
 
-    # plotting the points
-    plt.plot(epochs_list, test_acc_list)
+    with open('graph_resnet_cifar100.csv', 'wb') as result_file:
+        wr = csv.writer(result_file, dialect='excel')
+        wr.writerow(test_acc_list)
 
-    # naming the x axis
-    plt.xlabel('Epochs')
-    # naming the y axis
-    plt.ylabel('Test Accuracy')
-
-    # giving a title to my graph
-    plt.title('Resnet CIFAR100')
-
-    # function to show the plot
-    plt.show()
+    print("Saved Test Accuracy list for graph")
 
 
 def test(device, loss_fn, res_net, test_ds_loader):
@@ -189,7 +181,7 @@ def test(device, loss_fn, res_net, test_ds_loader):
             loss = loss_fn(outputs, labels)
 
             cur_loss += loss.item()
-            cur_loss /= (i + 1)
+            avg_loss = cur_loss / (i + 1)
 
             _, predicted_label = torch.max(outputs, 1)
             total_samples += labels.shape[0]
@@ -199,7 +191,7 @@ def test(device, loss_fn, res_net, test_ds_loader):
 
             if i % 50 == 0:
                 print('Testing [batch: %d] loss: %.3f, accuracy: %.5f' %
-                      (i + 1, cur_loss, accuracy))
+                      (i + 1, avg_loss, accuracy))
     return accuracy
 
 
