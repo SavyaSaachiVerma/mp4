@@ -198,7 +198,7 @@ def main():
 
     print("Testing Completed with accuracy:" + str(accuracy))
 
-    with open('graph_resnet_tinyimagenet.csv', 'wb') as result_file:
+    with open('graph_resnet_tinyimagenet.csv', 'w') as result_file:
         wr = csv.writer(result_file, dialect='excel')
         wr.writerow(test_acc_list)
 
