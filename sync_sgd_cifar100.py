@@ -8,7 +8,7 @@ import torchvision
 import torchvision.transforms as transforms
 import matplotlib
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 
 from torch import optim
 from torch.backends import cudnn
@@ -217,6 +217,8 @@ def main():
 
         # function to show the plot
         plt.show()
+
+        print("Plotted the Graph!")
 
 
 def test(loss_fn, res_net, test_ds_loader):
