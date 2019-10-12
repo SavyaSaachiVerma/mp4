@@ -6,6 +6,8 @@ import torch.nn as nn
 import random
 import torchvision
 import torchvision.transforms as transforms
+import matplotlib.pyplot as plt
+
 from torch import optim
 from torch.backends import cudnn
 from torch.utils import data, model_zoo
@@ -41,7 +43,7 @@ batch_size_train = 128
 batch_size_test = 64
 data_dir = "./Data"
 learning_rate = 0.001
-epochs = 50
+epochs = 5
 load_chkpt = False
 
 """ Partitioning MNIST """
@@ -122,6 +124,9 @@ def main():
     """Adam Optimizer (as it takes advantage of both RMSDrop and Momentum"""
     optimizer = optim.Adam(res_net.parameters(), lr=learning_rate)
 
+    test_acc_list = []
+    epochs_list = [x for x in range(epochs)]
+
     for epoch in range(start_epoch, epochs):
 
         cur_loss = 0.0
@@ -155,7 +160,7 @@ def main():
             optimizer.step()
 
             cur_loss += loss.cpu().data.numpy()
-            cur_loss /= (i + 1)
+            avg_loss = cur_loss / (i + 1)
 
             _, predicted_label = torch.max(outputs, 1)
             # print(predicted_label.shape, labels.shape)
@@ -168,9 +173,12 @@ def main():
 
             if i % 100 == 0:
                 print('Training [rank: %d, epoch: %d, batch: %d] loss: %.3f, accuracy: %.5f' %
-                      (rank, epoch + 1, i + 1, cur_loss, accuracy))
+                      (rank, epoch + 1, i + 1, avg_loss, accuracy))
 
         if rank == 0:
+
+            test_acc_list.append(test(loss_fn, res_net, test_ds_loader))
+
             """Saving model after every 5 epochs"""
             if (epoch + 1) % 5 == 0:
                 print('==> Saving model ...')
@@ -190,32 +198,51 @@ def main():
         """Puts model in testing state"""
         res_net.eval()
 
-        cur_loss = 0.0
-        total_correct = 0
-        total_samples = 0
-        """Do testing under the no_grad() context so that torch does not store/use these actions to calculate gradients"""
-        #with torch.no_grad():
-        for i, (inputs, labels) in enumerate(test_ds_loader):
-            inputs = Variable(inputs.cuda())
-            labels = Variable(labels.cuda())
-
-            # inputs = Variable(inputs)
-
-            outputs = res_net(inputs)
-            loss = loss_fn(outputs, labels)
-
-            cur_loss += loss.cpu().data.numpy()
-            cur_loss /= (i + 1)
-
-            _, predicted_label = torch.max(outputs, 1)
-            total_samples += labels.shape[0]
-            total_correct += predicted_label.eq(labels.long()).float().sum().cpu().data.numpy()
-            accuracy = total_correct / total_samples
-
-            if i % 50 == 0:
-                print('Testing [batch: %d] loss: %.3f, accuracy: %.5f' % (i + 1, cur_loss, accuracy))
+        accuracy = test(accuracy, loss_fn, res_net, test_ds_loader)
 
         print("Testing Completed with accuracy:" + str(accuracy))
+
+        # plotting the points
+        plt.plot(epochs_list, test_acc_list)
+
+        # naming the x axis
+        plt.xlabel('Epochs')
+        # naming the y axis
+        plt.ylabel('Test Accuracy')
+
+        # giving a title to my graph
+        plt.title('Sync SGD CIFAR100')
+
+        # function to show the plot
+        plt.show()
+
+
+def test(loss_fn, res_net, test_ds_loader):
+    cur_loss = 0.0
+    total_correct = 0
+    total_samples = 0
+    """Do testing under the no_grad() context so that torch does not store/use these actions to calculate gradients"""
+    # with torch.no_grad():
+    for i, (inputs, labels) in enumerate(test_ds_loader):
+        inputs = Variable(inputs.cuda())
+        labels = Variable(labels.cuda())
+
+        # inputs = Variable(inputs)
+
+        outputs = res_net(inputs)
+        loss = loss_fn(outputs, labels)
+
+        cur_loss += loss.cpu().data.numpy()
+        avg_loss = cur_loss / (i + 1)
+
+        _, predicted_label = torch.max(outputs, 1)
+        total_samples += labels.shape[0]
+        total_correct += predicted_label.eq(labels.long()).float().sum().cpu().data.numpy()
+        accuracy = total_correct / total_samples
+
+        if i % 50 == 0:
+            print('Testing [batch: %d] loss: %.3f, accuracy: %.5f' % (i + 1, avg_loss, accuracy))
+    return accuracy
 
 
 if __name__=="__main__":
