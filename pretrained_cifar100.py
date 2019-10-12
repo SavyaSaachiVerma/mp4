@@ -6,6 +6,9 @@ import torch.nn as nn
 import random
 import torchvision
 import torchvision.transforms as transforms
+import matplotlib.pyplot as plt
+
+
 from torch import optim
 from torch.backends import cudnn
 from torch.utils import data, model_zoo
@@ -16,7 +19,7 @@ data_dir = "./Data"
 batch_size_train = 128
 batch_size_test = 64
 learning_rate = 0.001
-epochs = 30
+epochs = 15
 load_chkpt = False
 
 
@@ -97,6 +100,9 @@ def main():
     """Adam Optimizer (as it takes advantage of both RMSDrop and Momentum"""
     optimizer = optim.Adam(res_net.parameters(), lr=learning_rate)
 
+    test_acc_list = []
+    epochs_list = [x for x in range(epochs)]
+
     for epoch in range(start_epoch, epochs):
 
         cur_loss = 0.0
@@ -144,6 +150,8 @@ def main():
                 print('Training [epoch: %d, batch: %d] loss: %.3f, accuracy: %.5f' %
                       (epoch + 1, i + 1, cur_loss, accuracy))
 
+        test_acc_list.append(test(loss_fn, res_net, test_ds_loader))
+
         """Saving model after every 5 epochs"""
         if (epoch + 1) % 5 == 0:
             print('==> Saving model ...')
@@ -162,6 +170,26 @@ def main():
     """Puts model in testing state"""
     res_net.eval()
 
+    accuracy = test(device, loss_fn, res_net, test_ds_loader)
+
+    print("Testing Completed with accuracy:" + str(accuracy))
+
+    # plotting the points
+    plt.plot(epochs_list, test_acc_list)
+
+    # naming the x axis
+    plt.xlabel('Epochs')
+    # naming the y axis
+    plt.ylabel('Test Accuracy')
+
+    # giving a title to my graph
+    plt.title('Pretrained CIFAR100')
+
+    # function to show the plot
+    plt.show()
+
+
+def test(device, loss_fn, res_net, test_ds_loader):
     cur_loss = 0.0
     total_correct = 0
     total_samples = 0
@@ -188,8 +216,7 @@ def main():
             if i % 50 == 0:
                 print('Testing [batch: %d] loss: %.3f, accuracy: %.5f' %
                       (i + 1, cur_loss, accuracy))
-
-    print("Testing Completed with accuracy:" + str(accuracy))
+    return accuracy
 
 
 if __name__=="__main__":
