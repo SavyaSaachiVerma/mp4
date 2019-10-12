@@ -6,7 +6,9 @@ import torch.nn as nn
 import random
 import torchvision
 import torchvision.transforms as transforms
-import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt 
 
 from torch import optim
 from torch.backends import cudnn
