@@ -6,9 +6,7 @@ import torch.nn as nn
 import random
 import torchvision
 import torchvision.transforms as transforms
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
+import csv
 
 from torch import optim
 from torch.backends import cudnn
@@ -127,7 +125,6 @@ def main():
     optimizer = optim.Adam(res_net.parameters(), lr=learning_rate)
 
     test_acc_list = []
-    epochs_list = [x for x in range(epochs)]
 
     for epoch in range(start_epoch, epochs):
 
@@ -204,21 +201,12 @@ def main():
 
         print("Testing Completed with accuracy:" + str(accuracy))
 
-        # plotting the points
-        plt.plot(epochs_list, test_acc_list)
+        # save the test accuracy list in csv file
+        with open('graph_sync_sgd_cifar100.csv', 'wb') as result_file:
+            wr = csv.writer(result_file, dialect='excel')
+            wr.writerow(test_acc_list)
 
-        # naming the x axis
-        plt.xlabel('Epochs')
-        # naming the y axis
-        plt.ylabel('Test Accuracy')
-
-        # giving a title to my graph
-        plt.title('Sync SGD CIFAR100')
-
-        # function to show the plot
-        plt.show()
-
-        print("Plotted the Graph!")
+        print("Saved Test Accuracy list for graph")
 
 
 def test(loss_fn, res_net, test_ds_loader):
