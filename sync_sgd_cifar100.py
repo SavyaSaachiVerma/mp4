@@ -154,7 +154,7 @@ def main():
             average_gradients(res_net)
             optimizer.step()
 
-            cur_loss += loss.item()
+            cur_loss += loss.data.item()
             cur_loss /= (i + 1)
 
             _, predicted_label = torch.max(outputs, 1)
@@ -196,15 +196,15 @@ def main():
         """Do testing under the no_grad() context so that torch does not store/use these actions to calculate gradients"""
         with torch.no_grad():
             for i, (inputs, labels) in enumerate(test_ds_loader):
-                inputs = inputs.cuda()
-                labels = labels.cuda()
+                inputs = Variable(inputs.cuda())
+                labels = Variable(labels.cuda())
 
-                inputs = Variable(inputs)
+                # inputs = Variable(inputs)
 
                 outputs = res_net(inputs)
                 loss = loss_fn(outputs, labels)
 
-                cur_loss += loss.item()
+                cur_loss += loss.data.item()
                 cur_loss /= (i + 1)
 
                 _, predicted_label = torch.max(outputs, 1)
