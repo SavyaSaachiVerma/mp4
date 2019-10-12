@@ -41,7 +41,7 @@ batch_size_train = 128
 batch_size_test = 64
 data_dir = "./Data"
 learning_rate = 0.001
-epochs = 2
+epochs = 50
 load_chkpt = False
 
 """ Partitioning MNIST """
@@ -209,16 +209,10 @@ def main():
 
             _, predicted_label = torch.max(outputs, 1)
             total_samples += labels.shape[0]
-            # print(total_samples)
-            # arr = (predicted_label == labels).numpy()
             total_correct += predicted_label.eq(labels.long()).float().sum().cpu().data.numpy()
-            # print(total_correct)
             accuracy = total_correct / total_samples
 
             if i % 50 == 0:
-                # print(i+1)
-                # print(cur_loss)
-                # print(accuracy)
                 print('Testing [batch: %d] loss: %.3f, accuracy: %.5f' % (i + 1, cur_loss, accuracy))
 
         print("Testing Completed with accuracy:" + str(accuracy))
