@@ -36,11 +36,10 @@ backend = 'mpi'
 dist.init_process_group(backend, rank=rank, world_size=num_nodes)
 dtype = torch.FloatTensor
 
-if rank == 0:
-    data_dir = "./Data"
-    batch_size_train = 128
-    batch_size_test = 64
 
+batch_size_train = 128
+batch_size_test = 64
+data_dir = "./Data"
 learning_rate = 0.001
 epochs = 50
 load_chkpt = False
