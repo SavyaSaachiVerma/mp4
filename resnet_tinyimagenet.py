@@ -174,7 +174,7 @@ def main():
                 print('Training [epoch: %d, batch: %d] loss: %.3f, accuracy: %.5f' %
                       (epoch + 1, i + 1, avg_loss, accuracy))
 
-        test_acc_list.append(test(loss_fn, res_net, test_ds_loader))
+        test_acc_list.append(test(device, loss_fn, res_net, test_ds_loader))
 
         """Saving model after every 5 epochs"""
         if (epoch + 1) % 5 == 0:
