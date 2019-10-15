@@ -10,4 +10,4 @@ cd /u/training/tra287/mp4
 . /opt/modules/default/init/bash # NEEDED to add module commands to shell
 module load python/2.0.1
 #module load cudatoolkit
-aprun -n 1 -N 1 python main.py
+aprun -n 1 -N 1 python resnet_cifar100.py
