@@ -13,7 +13,7 @@ class ResNet(nn.Module):
         self.conv3_x = self.add_basic_blocks(32, 64, num_basic_blocks_list[1], stride=2)
         self.conv4_x = self.add_basic_blocks(64, 128, num_basic_blocks_list[2], stride=2)
         self.conv5_x = self.add_basic_blocks(128, 256, num_basic_blocks_list[3], stride=2)
-        self.max_pool = nn.MaxPool2d(max_pool_stride, stride=1)
+        self.max_pool = nn.MaxPool2d(4, stride=max_pool_stride)
         self.fc = nn.Linear(linear_layer_num_input, num_classes)
 
     def forward(self, x):
