@@ -77,7 +77,7 @@ def main():
 
     train_dir = '/u/training/tra287/scratch/tiny-imagenet-200/train'
     train_ds = datasets.ImageFolder(train_dir, transform=augment_train_ds)
-    print(train_ds.class_to_idx)
+    # print(train_ds.class_to_idx)
     train_ds_loader = data.DataLoader(train_ds, batch_size=batch_size_train, shuffle=True, num_workers=8)
 
     val_dir = '/u/training/tra287/scratch/tiny-imagenet-200/val/'
@@ -93,7 +93,7 @@ def main():
     # test_ds_loader = data.DataLoader(test_ds, batch_size=batch_size_test, shuffle=False, num_workers=8)
 
     test_ds = datasets.ImageFolder(val_dir, transform=augment_test_ds)
-    print(test_ds.class_to_idx)
+    #print(test_ds.class_to_idx)
     test_ds_loader = torch.utils.data.DataLoader(test_ds, batch_size=batch_size_test, shuffle=False, num_workers=8)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
