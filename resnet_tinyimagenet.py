@@ -24,10 +24,10 @@ def create_val_folder(val_dir):
     """
     # path where validation data is present now
     path = os.path.join(val_dir, 'images')
-    print(path)
+    # print(path)
     # file where image2class mapping is present
     filename = os.path.join(val_dir, 'val_annotations.txt')
-    print(filename)
+    # print(filename)
     fp = open(filename, "r")  # open file in read mode
     data = fp.readlines()  # read line by line
     """
@@ -45,7 +45,7 @@ def create_val_folder(val_dir):
         newpath = (os.path.join(path, folder))
         if not os.path.exists(newpath):  # check if folder exists
             os.makedirs(newpath)
-            print(newpath)
+            # print(newpath)
         # Check if image exists in default directory
         if os.path.exists(os.path.join(path, img)):
             os.rename(os.path.join(path, img), os.path.join(newpath, img))
@@ -55,7 +55,7 @@ def create_val_folder(val_dir):
 batch_size_train = 256
 batch_size_test = 64
 learning_rate = 0.001
-epochs = 50
+epochs = 40
 load_chkpt = False
 
 def main():
@@ -86,14 +86,14 @@ def main():
 
     val_dir = '/u/training/tra287/scratch/tiny-imagenet-200/val/'
 
-    print("Now working on Val Dir")
+    # print("Now working on Val Dir")
     if 'val_' in os.listdir(val_dir+'images/')[0]:
-        print("Calling create_val_dir() with val_dir: ", val_dir)
+        # print("Calling create_val_dir() with val_dir: ", val_dir)
         create_val_folder(val_dir)
         val_dir = val_dir + 'images/'
-        print("changed val_dir to : ", val_dir)
+        # print("changed val_dir to : ", val_dir)
     else:
-        print("Didnt call create_val_dir")
+        # print("Didnt call create_val_dir")
         val_dir = val_dir + 'images/'
     #train_ds = torchvision.datasets.ImageNet(train_dir, split='train', download=False, transform=augment_train_ds)
     # train_ds_loader = data.DataLoader(train_ds, batch_size=batch_size_train, shuffle=True, num_workers=8)
@@ -124,124 +124,124 @@ def main():
         res_net = torch.nn.DataParallel(res_net)
         cudnn.benchmark = True
 
-#     """___________ Training ___________"""
-#
-#     print("Starting Training")
-#
-#     """Criterion Function: Softmax + Log-Likelihood"""
-#     loss_fn = nn.CrossEntropyLoss()
-#     """Adam Optimizer (as it takes advantage of both RMSDrop and Momentum"""
-#     optimizer = optim.Adam(res_net.parameters(), lr=learning_rate)
-#
-#     test_acc_list = []
-#     epochs_list = [x for x in range(epochs)]
-#
-#     for epoch in range(start_epoch, epochs):
-#
-#         cur_loss = 0.0
-#         total_correct = 0
-#         total_samples = 0
-#
-#         """ Overflow error in the optimizer if the step size is not reset."""
-#         if epoch > 8:
-#             for group in optimizer.param_groups:
-#                 for p in group['params']:
-#                     state = optimizer.state[p]
-#                     if state['step'] >= 1024:
-#                         state['step'] = 1000
-#
-#         for i, (inputs, labels) in enumerate(train_ds_loader):
-#
-#             """Transfer inputs and labels to CUDA if available"""
-#             inputs = Variable(inputs).to(device)
-#             labels = Variable(labels).to(device)
-#
-#             """Loss function requires the inputs to be wrapped in variables"""
-#             # inputs = Variable(inputs)
-#
-#             """Torch tends to take cumulative gradients which is not required so setting it to zero after each batch"""
-#             optimizer.zero_grad()
-#
-#             outputs = res_net(inputs)
-#             loss = loss_fn(outputs, labels)
-#             loss.backward()
-#             optimizer.step()
-#
-#             cur_loss += loss.item()
-#             avg_loss = cur_loss / (i + 1)
-#
-#             _, predicted_label = torch.max(outputs, 1)
-#             # print(predicted_label.shape, labels.shape)
-#             total_samples += labels.shape[0]
-#             # arr = (predicted_label == labels).numpy()
-#             # print(np.sum(arr))
-#             """can not use numpy as the tensors are in CUDA"""
-#             total_correct += predicted_label.eq(labels.long()).float().sum().item()
-#             accuracy = total_correct / total_samples
-#
-#             if i % 100 == 0:
-#                 print('Training [epoch: %d, batch: %d] loss: %.3f, accuracy: %.5f' %
-#                       (epoch + 1, i + 1, avg_loss, accuracy))
-#
-#         test_acc_list.append(test(device, loss_fn, res_net, test_ds_loader))
-#
-#         """Saving model after every 5 epochs"""
-#         if (epoch + 1) % 5 == 0:
-#             print('==> Saving model ...')
-#             state = {
-#                 'res_net_model': res_net.state_dict(),
-#                 'epoch': epoch,
-#             }
-#             if not os.path.isdir('./Checkpoint'):
-#                 os.mkdir('Checkpoint')
-#             torch.save(state, './Checkpoint/model_state.pt')
-#
-#     print("Training Completed!")
-#
-#     """___________ Testing ____________"""
-#     print("Testing Started")
-#     """Puts model in testing state"""
-#     res_net.eval()
-#
-#     accuracy = test(device, loss_fn, res_net, test_ds_loader)
-#
-#     print("Testing Completed with accuracy:" + str(accuracy))
-#
-#     with open('graph_resnet_tinyimagenet.csv', 'w') as result_file:
-#         wr = csv.writer(result_file, dialect='excel')
-#         wr.writerow(test_acc_list)
-#
-#     print("Saved Test Accuracy list for graph")
-#
-#
-# def test(device, loss_fn, res_net, test_ds_loader):
-#     cur_loss = 0.0
-#     total_correct = 0
-#     total_samples = 0
-#     """Do testing under the no_grad() context so that torch does not store/use these actions to calculate gradients"""
-#     with torch.no_grad():
-#         for i, (inputs, labels) in enumerate(test_ds_loader):
-#             inputs = inputs.to(device)
-#             labels = labels.to(device)
-#
-#             inputs = Variable(inputs)
-#
-#             outputs = res_net(inputs)
-#             loss = loss_fn(outputs, labels)
-#
-#             cur_loss += loss.item()
-#             avg_loss = cur_loss / (i + 1)
-#
-#             _, predicted_label = torch.max(outputs, 1)
-#             total_samples += labels.shape[0]
-#             # arr = (predicted_label == labels).numpy()
-#             total_correct += predicted_label.eq(labels.long()).float().sum().item()
-#             accuracy = total_correct / total_samples
-#
-#             if i % 50 == 0:
-#                 print('Testing [batch: %d] loss: %.3f, accuracy: %.5f' %
-#                       (i + 1, avg_loss, accuracy))
-#     return accuracy
+    """___________ Training ___________"""
+
+    print("Starting Training")
+
+    """Criterion Function: Softmax + Log-Likelihood"""
+    loss_fn = nn.CrossEntropyLoss()
+    """Adam Optimizer (as it takes advantage of both RMSDrop and Momentum"""
+    optimizer = optim.Adam(res_net.parameters(), lr=learning_rate)
+
+    test_acc_list = []
+    epochs_list = [x for x in range(epochs)]
+
+    for epoch in range(start_epoch, epochs):
+
+        cur_loss = 0.0
+        total_correct = 0
+        total_samples = 0
+
+        """ Overflow error in the optimizer if the step size is not reset."""
+        if epoch > 8:
+            for group in optimizer.param_groups:
+                for p in group['params']:
+                    state = optimizer.state[p]
+                    if state['step'] >= 1024:
+                        state['step'] = 1000
+
+        for i, (inputs, labels) in enumerate(train_ds_loader):
+
+            """Transfer inputs and labels to CUDA if available"""
+            inputs = Variable(inputs).to(device)
+            labels = Variable(labels).to(device)
+
+            """Loss function requires the inputs to be wrapped in variables"""
+            # inputs = Variable(inputs)
+
+            """Torch tends to take cumulative gradients which is not required so setting it to zero after each batch"""
+            optimizer.zero_grad()
+
+            outputs = res_net(inputs)
+            loss = loss_fn(outputs, labels)
+            loss.backward()
+            optimizer.step()
+
+            cur_loss += loss.item()
+            avg_loss = cur_loss / (i + 1)
+
+            _, predicted_label = torch.max(outputs, 1)
+            # print(predicted_label.shape, labels.shape)
+            total_samples += labels.shape[0]
+            # arr = (predicted_label == labels).numpy()
+            # print(np.sum(arr))
+            """can not use numpy as the tensors are in CUDA"""
+            total_correct += predicted_label.eq(labels.long()).float().sum().item()
+            accuracy = total_correct / total_samples
+
+            if i % 100 == 0:
+                print('Training [epoch: %d, batch: %d] loss: %.3f, accuracy: %.5f' %
+                      (epoch + 1, i + 1, avg_loss, accuracy))
+
+        test_acc_list.append(test(device, loss_fn, res_net, test_ds_loader))
+
+        """Saving model after every 5 epochs"""
+        if (epoch + 1) % 5 == 0:
+            print('==> Saving model ...')
+            state = {
+                'res_net_model': res_net.state_dict(),
+                'epoch': epoch,
+            }
+            if not os.path.isdir('./Checkpoint'):
+                os.mkdir('Checkpoint')
+            torch.save(state, './Checkpoint/model_state.pt')
+
+    print("Training Completed!")
+
+    """___________ Testing ____________"""
+    print("Testing Started")
+    """Puts model in testing state"""
+    res_net.eval()
+
+    accuracy = test(device, loss_fn, res_net, test_ds_loader)
+
+    print("Testing Completed with accuracy:" + str(accuracy))
+
+    with open('graph_resnet_tinyimagenet.csv', 'w') as result_file:
+        wr = csv.writer(result_file, dialect='excel')
+        wr.writerow(test_acc_list)
+
+    print("Saved Test Accuracy list for graph")
+
+
+def test(device, loss_fn, res_net, test_ds_loader):
+    cur_loss = 0.0
+    total_correct = 0
+    total_samples = 0
+    """Do testing under the no_grad() context so that torch does not store/use these actions to calculate gradients"""
+    with torch.no_grad():
+        for i, (inputs, labels) in enumerate(test_ds_loader):
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+
+            inputs = Variable(inputs)
+
+            outputs = res_net(inputs)
+            loss = loss_fn(outputs, labels)
+
+            cur_loss += loss.item()
+            avg_loss = cur_loss / (i + 1)
+
+            _, predicted_label = torch.max(outputs, 1)
+            total_samples += labels.shape[0]
+            # arr = (predicted_label == labels).numpy()
+            total_correct += predicted_label.eq(labels.long()).float().sum().item()
+            accuracy = total_correct / total_samples
+
+            if i % 50 == 0:
+                print('Testing [batch: %d] loss: %.3f, accuracy: %.5f' %
+                      (i + 1, avg_loss, accuracy))
+    return accuracy
 
 
 if __name__ == "__main__":
