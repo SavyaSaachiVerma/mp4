@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 class ResNet(nn.Module):
-    def __init__(self, basic_block, num_basic_blocks_list, num_classes=100):
+    def __init__(self, basic_block, num_basic_blocks_list, num_classes=100, linear_layer_num_input=256, max_pool_stride=1):
         super(ResNet, self).__init__()
         self.basic_block = basic_block
         self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1, bias=False)
@@ -13,8 +13,8 @@ class ResNet(nn.Module):
         self.conv3_x = self.add_basic_blocks(32, 64, num_basic_blocks_list[1], stride=2)
         self.conv4_x = self.add_basic_blocks(64, 128, num_basic_blocks_list[2], stride=2)
         self.conv5_x = self.add_basic_blocks(128, 256, num_basic_blocks_list[3], stride=2)
-        self.max_pool = nn.MaxPool2d(4, stride=1)
-        self.fc = nn.Linear(256, num_classes)
+        self.max_pool = nn.MaxPool2d(max_pool_stride, stride=1)
+        self.fc = nn.Linear(linear_layer_num_input, num_classes)
 
     def forward(self, x):
         x = self.conv1(x)

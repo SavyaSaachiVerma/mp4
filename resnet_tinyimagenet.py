@@ -100,7 +100,8 @@ def main():
 
     print("Initializing Model")
     basic_block = BasicBlock
-    res_net = ResNet(basic_block=basic_block, num_basic_blocks_list=[2, 4, 4, 2], num_classes=200)
+    res_net = ResNet(basic_block=basic_block, num_basic_blocks_list=[2, 4, 4, 2], num_classes=200,
+                     linear_layer_num_input=2304, max_pool_stride=2)
     res_net = res_net.to(device)
     start_epoch = 0
 
