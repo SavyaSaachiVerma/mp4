@@ -24,8 +24,10 @@ def create_val_folder(val_dir):
     """
     # path where validation data is present now
     path = os.path.join(val_dir, 'images')
+    print(path)
     # file where image2class mapping is present
     filename = os.path.join(val_dir, 'val_annotations.txt')
+    print(filename)
     fp = open(filename, "r")  # open file in read mode
     data = fp.readlines()  # read line by line
     """
@@ -36,16 +38,17 @@ def create_val_folder(val_dir):
     for line in data:
         words = line.split("\t")
         val_img_dict[words[0]] = words[1]
+        # print("Dict: ", words[0], words[1])
     fp.close()
     # Create folder if not present, and move image into proper folder
     for img, folder in val_img_dict.items():
         newpath = (os.path.join(path, folder))
-    if not os.path.exists(newpath):  # check if folder exists
-        os.makedirs(newpath)
-        print(newpath)
-    # Check if image exists in default directory
-    if os.path.exists(os.path.join(path, img)):
-        os.rename(os.path.join(path, img), os.path.join(newpath, img))
+        if not os.path.exists(newpath):  # check if folder exists
+            os.makedirs(newpath)
+            print(newpath)
+        # Check if image exists in default directory
+        if os.path.exists(os.path.join(path, img)):
+            os.rename(os.path.join(path, img), os.path.join(newpath, img))
     return
 
 
@@ -83,10 +86,14 @@ def main():
 
     val_dir = '/u/training/tra287/scratch/tiny-imagenet-200/val/'
 
+    print("Now working on Val Dir")
     if 'val_' in os.listdir(val_dir+'images/')[0]:
+        print("Calling create_val_dir() with val_dir: ", val_dir)
         create_val_folder(val_dir)
         val_dir = val_dir + 'images/'
+        print("changed val_dir to : ", val_dir)
     else:
+        print("Didnt call create_val_dir")
         val_dir = val_dir + 'images/'
     #train_ds = torchvision.datasets.ImageNet(train_dir, split='train', download=False, transform=augment_train_ds)
     # train_ds_loader = data.DataLoader(train_ds, batch_size=batch_size_train, shuffle=True, num_workers=8)
